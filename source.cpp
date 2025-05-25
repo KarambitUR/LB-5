@@ -4,50 +4,82 @@
 #include <sstream>
 using namespace std;
 
-// Забороняється змінювати сигнатуру функції Task1!  
-
-// Функція знаходження найбільшого спільного дільника чисел a і b
-unsigned int GCD(unsigned int a, unsigned int b) {	
-    // Розмістіть тут Ваш код
+unsigned int GCD(unsigned int a, unsigned int b) {
+    while (b != 0) {
+        unsigned int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
 }
-
-// Функція знаходження оберненого до x за модулем m числа 
+ 
 unsigned int Inverse(unsigned int x, unsigned int m) {
-    // Розмістіть тут Ваш код
-}
-
-// Функція піднесення числа a до степеня n за модулем m
-unsigned int QuickPower(unsigned int a, unsigned int n, unsigned int m) {
-    // Розмістіть тут Ваш код	   
-}
-
-// Завдання 1
-// 
-// Функція приймає у якості аргументів:
-// source - масив джерела інформації (масив десяткових чисел), 
-// sourceSize - кількість елементів масиву джерела інформації, 
-// p, q - прості числа для генерування пари ключів алгоритму RSA, 
-// encryptionMode - передається true у випадку, коли необхідно здійснити 
-//                  шифрування елементів масиву джерела інформації за 
-//                  алгоритмом RSA і false - коли необхідно здійснити 
-//                  дешифрування.
-// 
-// Функція повинна повертати рядок, який містить вивід результату застосування 
-// процедури шифрування (дешифрування) за алгоритмом RSA до масиву джерела 
-// інформації (послідовність розділених пробілами десяткових чисел). 
-// Наприклад (масив M2 був визначений попередньо):
-// Task1(M2,  4, 23, 31, true) - "491 190 549 269" (без лапок)
-string Task1 (unsigned int* source, unsigned int sourceSize, unsigned int p, unsigned int q, bool encryptionMode) {
-    // Об'єктом stringstream можна користуватись як і об'єктом iostream
-    // Наприклад, коректним є запис
-    // functionOutput << arr[i] << " ";
-    stringstream functionOutput;
-
-    // Перебір варіантів для відкритого ключа починати з 10 для підвищення 
-    // рівня захищеності шифру
+    int m0 = m;
+    int y = 0, x1 = 1;
     
-    // Розмістіть тут Ваш код
+    while (m != 0) {
+        int q = x / m;
+        int temp = m;
+        m = x % m;
+        x = temp;
+        int temp_y = y;
+        y = x1 - q * y;
+        x1 = temp_y;
+    }
+    
+    if (x1 < 0) {
+        x1 += m0;
+    }
+    
+    return x1;
+}
 
-    // Конвертування об'єкту stringstream у рядок для відповідності сигнатурі функції
+unsigned int QuickPower(unsigned int a, unsigned int n, unsigned int m) {
+    unsigned long long result = 1;
+    unsigned long long base = a % m;
+    
+    while (n > 0) {
+        if (n % 2 == 1) {
+            result = (result * base) % m;
+        }
+        base = (base * base) % m;
+        n /= 2;
+    }
+    
+    return result;
+}
+
+string Task1 (unsigned int* source, unsigned int sourceSize, unsigned int p, unsigned int q, bool encryptionMode) {
+    stringstream functionOutput;
+    
+    unsigned int n = p * q;
+    
+    unsigned int p_minus_1 = p - 1;
+    unsigned int q_minus_1 = q - 1;
+    unsigned int lambda_n = (p_minus_1 * q_minus_1) / GCD(p_minus_1, q_minus_1);
+    
+    unsigned int e = 10;
+    while (e < lambda_n && GCD(e, lambda_n) != 1) {
+        e++;
+    }
+    
+    unsigned int d = Inverse(e, lambda_n);
+    
+    for (unsigned int i = 0; i < sourceSize; i++) {
+        unsigned int m = source[i];
+        unsigned int result;
+        
+        if (encryptionMode) {
+            result = QuickPower(m, e, n);
+        } else {
+            result = QuickPower(m, d, n);
+        }
+        
+        functionOutput << result;
+        if (i < sourceSize - 1) {
+            functionOutput << " ";
+        }
+    }
+    
     return functionOutput.str();
 }
